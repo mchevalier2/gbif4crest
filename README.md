@@ -1,2 +1,13 @@
 # gbif4crest
-A data engineering pipeline to process observations from the GBIF database into a relational database compatible with the crestr R package (https://www.manuelchevalier.com/crestr/index.html)
+A data engineering pipeline to process observations from the [GBIF database](https://www.gbif.org) into a relational database compatible with the [crestr R package](https://www.manuelchevalier.com/crestr/index.html).
+
+
+    [x] Create venv
+    [x] Install basic packages
+    [x] Get gbif packages
+    [x] Find a way to extract a list of species
+    [x] Find a way to extract a distribution from a species ID
+    [ ] Make sure the script is robust to lots of conditions (run overnight)
+    [ ] Rename class to order.
+    [ ] Identify the unit wher eto make the primary for loop
+    [ ] Get the necessary names
