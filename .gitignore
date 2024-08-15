@@ -10,6 +10,7 @@ __pycache__/
 .Python
 build/
 data/
+database_files/
 develop-eggs/
 dist/
 downloads/
@@ -19,6 +20,7 @@ lib/
 lib64/
 parts/
 sdist/
+tmp/
 var/
 wheels/
 share/python-wheels/
@@ -163,3 +165,4 @@ cython_debug/
 #.idea/
 
 gbif_pwd.txt
+.DS_Store
