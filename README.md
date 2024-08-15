@@ -8,6 +8,8 @@ A data engineering pipeline to process observations from the [GBIF database](htt
     [x] Find a way to extract a list of species
     [x] Find a way to extract a distribution from a species ID
     [ ] Make sure the script is robust to lots of conditions (run overnight)
-    [ ] Rename class to order.
-    [ ] Identify the unit wher eto make the primary for loop
-    [ ] Get the necessary names
+    [x] Rename class to order.
+    [x] Identify the unit where to make the primary for loop
+    [x] Get the necessary order names
+    [ ] Rename newID to the correct names
+    [ ] Create correct taxonIDs
