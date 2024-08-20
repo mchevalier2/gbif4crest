@@ -6,15 +6,13 @@ import random
 import subprocess
 import time
 
-import numpy as np
 import pandas as pd
 import requests
 from pygbif import occurrences as occ
 from pygbif import species
 
-
 LIST_OF_CLASSES = (
-    [ ## Plants
+    [  ## Plants
         "Liliopsida",
         "Magnoliopsida",
         "Polypodiopsida",
@@ -24,10 +22,10 @@ LIST_OF_CLASSES = (
         "Ginkgoopsida",
         "Cycadopsida",
     ]
-    + ["Anthocerotopsida"] ## More plants
-    + ["Mammalia"] ## mammals including rodents
-    + ["Bacillariophyceae"] ## diatoms
-    + [ ## More plants
+    + ["Anthocerotopsida"]  ## More plants
+    + ["Mammalia"]  ## mammals including rodents
+    + ["Bacillariophyceae"]  ## diatoms
+    + [  ## More plants
         "Bryopsida",
         "Sphagnopsida",
         "Polytrichopsida",
@@ -35,8 +33,8 @@ LIST_OF_CLASSES = (
         "Takakiopsida",
         "Andreaeobryopsida",
     ]
-    + ["Jungermanniopsida", "Marchantiopsida", "Haplomitriopsida"] ## More plants
-    + ["Globothalamea", "Tubothalamea"] ## forams
+    + ["Jungermanniopsida", "Marchantiopsida", "Haplomitriopsida"]  ## More plants
+    + ["Globothalamea", "Tubothalamea"]  ## forams
 )
 
 
@@ -56,24 +54,24 @@ TREE_OF_LIFE = [
     "species",
 ]
 
-with open("gbif_pwd.txt") as f:
+with open("gbif_pwd.txt", encoding="utf-8") as f:
     GBIF_USERNAME, GBIF_PASSWORD, GBIF_EMAIL = [x[:-1] for x in f.readlines()]
 
 
 try:
     os.mkdir(DATA_FOLDER)
-except:
+except FileExistsError:
     pass
 
 
 try:
     os.mkdir(TEMP_FOLDER)
-except:
+except FileExistsError:
     pass
 
 
-
-def API_request_name_usage(key, limit, offset):
+def API_request_name_usage(key: int, limit: int, offset: int) -> {}:
+    """Queries the GBIF API to get the list of children of a taxon"""
     keepgoing = True
     idx = 0
     while keepgoing and idx < 10:
@@ -102,12 +100,13 @@ def API_request_name_usage(key, limit, offset):
     return request
 
 
-def API_request_count(taxonID):
+def API_request_count(taxonID: int):
+    """Queries the GBIF API to get the number of occurrences of a taxon"""
     keepgoing = True
     idx = 0
     while keepgoing and idx < 10:
         try:
-            nbocc = occ.count(taxonKey=int(valk["speciesKey"]), isGeoreferenced=True)
+            nb_occ = occ.count(taxonKey=int(taxonID), isGeoreferenced=True)
             keepgoing = False
         except (
             requests.exceptions.ReadTimeout,
@@ -122,24 +121,26 @@ def API_request_count(taxonID):
     if idx == 10:
         print("The request has failed 10 times. Returning empty result.")
         return -1
-    return nbocc
+    return nb_occ
 
 
-def from_classes_to_orders(ll):
-    res = []
+def from_classes_to_orders(ll: list) -> list:
+    """Queries the GBIF API to return the list of orders corresponding to a class"""
+    list_of_orders = []
     for classes in ll:
         dic = species.name_backbone(name=classes, verbose=True)
         cla = pd.DataFrame(API_request_name_usage(dic["usageKey"], 1000, 0)["results"])
-        res += list(cla[["order", "class"]].dropna().loc[:, "order"])
-    return res
+        list_of_orders += list(cla[["order", "class"]].dropna().loc[:, "order"])
+    return list_of_orders
 
 
 LIST_OF_ORDERS = from_classes_to_orders(LIST_OF_CLASSES)
 print(
-    "\n\nWARNING: I am shuffling the list of orders to explore different datasets during the development stage. Remove for production phase.\n\n"
+    "\n\nWARNING: I am shuffling the list of orders to explore different "
+    + "datasets during the development stage. Remove for production phase.\n\n"
 )
 random.shuffle(LIST_OF_ORDERS)
-LIST_OF_ORDERS
+print(LIST_OF_ORDERS)
 
 # LIST_OF_CLASSES = ["Rotaliida", "Ericales", "Asterales"]
 
@@ -166,72 +167,75 @@ for order in LIST_OF_ORDERS:
         )
     while keep_going_order:
         ord = API_request_name_usage(usageKey, OFFSET_STEP, offset_order)
-        print(f"\n\n\nOffset loop on orders: {offset_order}")
+        print(f"\n\n\nOffset loop on orders: {offset_order} with order {order}")
         keep_going_order = not ord["endOfRecords"]
         offset_order += OFFSET_STEP
         df_order = pd.DataFrame(ord["results"])
-        df_order = df_order[df_order["family"].notna()]
-        print([x for x in df_order["family"]])
-        for i, vali in df_order.iterrows():
-            keep_going_fam, offset_fam = True, 0
-            # if vali["family"] in ["Asteraceae", "Calyceraceae", "Campanulaceae"]:
-            #    keep_going_fam = False
-            while keep_going_fam:
-                print(
-                    f'\n\n\nOffset loop on families "{vali['family']}" with offset {offset_fam}'
-                )
-                fam = API_request_name_usage(vali["key"], OFFSET_STEP, offset_fam)
-                keep_going_fam = not fam["endOfRecords"]
-                offset_fam += OFFSET_STEP
-                df_fam = pd.DataFrame(fam["results"])
-                if "genus" in df_fam.columns:
-                    for j, valj in df_fam.iterrows():
-                        keep_going_gen, offset_gen = True, 0
-                        while keep_going_gen:
-                            gen = API_request_name_usage(
-                                valj["key"], OFFSET_STEP, offset_gen
-                            )
-                            keep_going_gen = not gen["endOfRecords"]
-                            print(
-                                f'Genus: "{valj['genus']}" | Offset: {offset_gen} | Keepgoing: {keep_going_gen} | NSP: {len(gen["results"])} | Occ bef. process: {count_occurrences}'
-                            )
-                            offset_gen += OFFSET_STEP
-                            if len(gen["results"]):
-                                df_gen = pd.DataFrame(gen["results"])
-                                df_gen = df_gen[df_gen["genus"].notna()]
-                                df_gen = (
-                                    df_gen.query("taxonomicStatus == 'ACCEPTED'")
-                                    .query("rank == 'SPECIES'")
-                                    .query("nameType == 'SCIENTIFIC'")
-                                    .assign(tokeep=True)
-                                    .reset_index()
+        if df_order.shape[0] > 0:
+            df_order = df_order[df_order["family"].notna()]
+            print(list(df_order["family"]))
+            for i, vali in df_order.iterrows():
+                keep_going_fam, offset_fam = True, 0
+                # if vali["family"] in ["Asteraceae", "Calyceraceae", "Campanulaceae"]:
+                #    keep_going_fam = False
+                while keep_going_fam:
+                    print(
+                        f'\n\n\nOffset loop on families "{vali['family']}" with offset {offset_fam}'
+                    )
+                    fam = API_request_name_usage(vali["key"], OFFSET_STEP, offset_fam)
+                    keep_going_fam = not fam["endOfRecords"]
+                    offset_fam += OFFSET_STEP
+                    df_fam = pd.DataFrame(fam["results"])
+                    if "genus" in df_fam.columns:
+                        for j, valj in df_fam.iterrows():
+                            keep_going_gen, offset_gen = True, 0
+                            while keep_going_gen:
+                                gen = API_request_name_usage(
+                                    valj["key"], OFFSET_STEP, offset_gen
                                 )
-                                if "speciesKey" in df_gen.columns:
-                                    for k, valk in df_gen.iterrows():
-                                        nbocc = API_request_count(
-                                            int(valk["speciesKey"])
-                                        )
-                                        if nbocc < SP_OCC_THRESHOLD:
-                                            df_gen.iloc[k, -1] = False
-                                        else:
-                                            count_occurrences += nbocc
-                                    df_gen = df_gen[df_gen["tokeep"]]
-                                    if df_gen.shape[0]:
-                                        df_gen[TREE_OF_LIFE].to_csv(
-                                            filename,
-                                            mode="a",
-                                            header=False,
-                                            index=False,
-                                        )
-                                        list_of_sp += list(df_gen["speciesKey"])
+                                keep_going_gen = not gen["endOfRecords"]
+                                print(
+                                    f'Genus: "{valj['genus']}" | Offset: {offset_gen} | Keepgoing: {keep_going_gen} | NSP: {len(gen["results"])} | Occ bef. process: {count_occurrences}'
+                                )
+                                offset_gen += OFFSET_STEP
+                                if len(gen["results"]) > 0:
+                                    df_gen = pd.DataFrame(gen["results"])
+                                    df_gen = df_gen[df_gen["genus"].notna()]
+                                    df_gen = (
+                                        df_gen.query("taxonomicStatus == 'ACCEPTED'")
+                                        .query("rank == 'SPECIES'")
+                                        .query("nameType == 'SCIENTIFIC'")
+                                        .assign(tokeep=True)
+                                        .reset_index()
+                                    )
+                                    if "speciesKey" in df_gen.columns:
+                                        for k, valk in df_gen.iterrows():
+                                            nbocc = API_request_count(
+                                                int(valk["speciesKey"])
+                                            )
+                                            if nbocc < SP_OCC_THRESHOLD:
+                                                df_gen.iloc[k, -1] = False
+                                            else:
+                                                count_occurrences += nbocc
+                                        df_gen = df_gen[df_gen["tokeep"]]
+                                        if df_gen.shape[0]:
+                                            df_gen[TREE_OF_LIFE].to_csv(
+                                                filename,
+                                                mode="a",
+                                                header=False,
+                                                index=False,
+                                            )
+                                            list_of_sp += list(df_gen["speciesKey"])
     if count_occurrences > 40000000:
         print("\n\n\nCreating download request with:")
         res = occ.download(
             [
-                f'speciesKey in ["{'", "'.join([str(x) for x in list_of_sp])}"]',
+                f'speciesKey in ["{'", "'.join([str(int(x)) for x in list_of_sp])}"]',
                 "decimalLatitude !Null",
                 "decimalLongitude !Null",
-                'basisOfRecord in ["LIVING_SPECIMEN", "OBSERVATION", "HUMAN_OBSERVATION", "MACHINE_OBSERVATION", "MATERIAL_SAMPLE", "MATERIAL_CITATION", "OCCURRENCE"]',
+                'basisOfRecord in ["LIVING_SPECIMEN", "OBSERVATION", '
+                + '"HUMAN_OBSERVATION", "MACHINE_OBSERVATION", "MATERIAL_SAMPLE", '
+                + '"MATERIAL_CITATION", "OCCURRENCE"]',
             ],
             "SIMPLE_CSV",
             user=GBIF_USERNAME,
