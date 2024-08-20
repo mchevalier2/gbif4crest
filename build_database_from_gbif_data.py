@@ -1,3 +1,5 @@
+""" This script downloads and processes the results of the API requests """
+
 import os
 import time
 
@@ -25,7 +27,8 @@ except FileExistsError:
 print("\n\n\nCREATING TAXALIST TABLE")
 
 
-def create_ID_from_taxonomy(x):
+def create_ID_from_taxonomy(x: []) -> int:
+    """Creates a database-specific ID based on the taxonomy and existing ID"""
     a, b, d = x
     ## Plants
     if a in ["Tracheophyta", "Anthocerotophyta", "Bryophyta", "Marchantiophyta"]:
@@ -64,9 +67,10 @@ taxalist = taxalist.sort_values("taxonID")
 taxalist["gbifID"] = taxalist["gbifID"].astype("Int64")
 taxalist = taxalist.drop("newID", axis=1).reset_index(drop=True)
 
-assert (
-    taxalist[taxalist["taxonID"] == -1].shape[0] == 0
-), ["\nSome taxa did not get a proper taxonID.", taxalist.query("taxonID==-1")]
+assert taxalist[taxalist["taxonID"] == -1].shape[0] == 0, [
+    "\nSome taxa did not get a proper taxonID.",
+    taxalist.query("taxonID==-1"),
+]
 taxalist.to_csv(DATABASE_FOLDER + "taxalist.csv", mode="w", header=True, index=False)
 print(taxalist)
 # <============================================================================
@@ -75,13 +79,13 @@ print(taxalist)
 ## CREATING DISTRIB TABLE =====================================================>
 print("\n\n\nCREATING DISTRIB TABLE")
 # Loading the list of files to download from GBIF
-with open(DATA_FOLDER + "download_list.txt") as f:
+with open(DATA_FOLDER + "download_list.txt", encoding="utf-8") as f:
     LIST_OF_DATA_FILES = [x[:-1] for x in f.readlines()]
 
 # For each file in that list, do
 for datafile in LIST_OF_DATA_FILES:
     print("Analysing: " + datafile)
-    keeptrying = True if datafile + ".zip" not in os.listdir(DATA_FOLDER) else False
+    keeptrying = datafile + ".zip" not in os.listdir(DATA_FOLDER)
     while keeptrying:
         try:
             occ.download_get(datafile, path=DATA_FOLDER)
@@ -92,13 +96,15 @@ for datafile in LIST_OF_DATA_FILES:
     gbif_data = gbif_data[
         ["speciesKey", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
     ].drop_duplicates()
+    gbif_data = gbif_data[gbif_data["decimalLongitude"].notna()]
     gbif_data = gbif_data.merge(
         taxalist, left_on="speciesKey", right_on="gbifID", how="left"
     )
     gbif_data = gbif_data[
         ["taxonID", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
     ]
-    gbif_data["year"] = gbif_data["year"].astype("Int64")
+    gbif_data["year"] = pd.to_numeric(gbif_data["year"]).astype("Int64")
+    gbif_data = gbif_data[gbif_data["taxonID"].notna()]
     gbif_data.to_csv(
         TEMP_FOLDER + "distrib_" + datafile + ".useless",
         mode="w",
@@ -133,6 +139,7 @@ assert distrib["decimalLatitude"].isna().sum() == 0, "NAs in decimalLatitude"
 
 distrib.to_csv(DATABASE_FOLDER + "distrib.csv", mode="w", header=True, index=False)
 
+os.system(f"rm {TEMP_FOLDER}distrib_*.useless")
 
 # <============================================================================
 
