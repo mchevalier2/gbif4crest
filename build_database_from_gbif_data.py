@@ -50,7 +50,7 @@ LIST_OF_TAXALIST_FILES = [
 ]
 taxalist = (
     pd.concat(
-        (pd.read_csv(DATA_FOLDER + f) for f in LIST_OF_TAXALIST_FILES),
+        (pd.read_csv(DATA_FOLDER + f, low_memory=False) for f in LIST_OF_TAXALIST_FILES),
         ignore_index=True,
     )
     .drop_duplicates()
@@ -92,18 +92,26 @@ for datafile in LIST_OF_DATA_FILES:
             keeptrying = False
         except:
             time.sleep(600)
-    gbif_data = pd.read_csv(DATA_FOLDER + datafile + ".zip", sep="\t")
-    gbif_data = gbif_data[
-        ["speciesKey", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
-    ].drop_duplicates()
-    gbif_data = gbif_data[gbif_data["decimalLongitude"].notna()]
-    gbif_data = gbif_data.merge(
-        taxalist, left_on="speciesKey", right_on="gbifID", how="left"
+    gbif_data = pd.DataFrame({'speciesKey':[-1], "decimalLongitude":[-1.0], "decimalLatitude":[-1.0], "year":[-1], "basisOfRecord":['']})
+    ## Reading the occurrence data by chunks to not overload laptop.
+    for idx, temp_df in enumerate(pd.read_csv(DATA_FOLDER + datafile + ".zip", sep="\t", chunksize=2000000, low_memory=False)):
+        print('chunk:', idx)
+        temp_df = temp_df[
+            ["speciesKey", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
+        ].drop_duplicates()
+        temp_df = temp_df[temp_df["decimalLongitude"].notna()]
+        gbif_data = pd.concat([gbif_data, temp_df], ignore_index=True)
+    gbif_data = (
+        gbif_data
+        .drop(index=0) # Excluding the fake row I added to circumvent the warning
+        .drop_duplicates()
+        .merge(taxalist, left_on="speciesKey", right_on="gbifID", how="left")
     )
     gbif_data = gbif_data[
         ["taxonID", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
     ]
     gbif_data["year"] = pd.to_numeric(gbif_data["year"]).astype("Int64")
+    gbif_data["taxonID"] = gbif_data["taxonID"].astype("Int64")
     gbif_data = gbif_data[gbif_data["taxonID"].notna()]
     gbif_data.to_csv(
         TEMP_FOLDER + "distrib_" + datafile + ".useless",
