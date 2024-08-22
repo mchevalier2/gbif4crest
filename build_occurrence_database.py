@@ -82,6 +82,7 @@ def API_request_name_usage(key: int, limit: int, offset: int) -> {}:
                 rank="SPECIES",
                 limit=limit,
                 offset=offset,
+                timeout=300
             )
             keepgoing = False
         except (
@@ -106,7 +107,7 @@ def API_request_count(taxonID: int):
     idx = 0
     while keepgoing and idx < 10:
         try:
-            nb_occ = occ.count(taxonKey=int(taxonID), isGeoreferenced=True)
+            nb_occ = occ.count(taxonKey=int(taxonID), isGeoreferenced=True, timeout=300)
             keepgoing = False
         except (
             requests.exceptions.ReadTimeout,
@@ -128,19 +129,14 @@ def from_classes_to_orders(ll: list) -> list:
     """Queries the GBIF API to return the list of orders corresponding to a class"""
     list_of_orders = []
     for classes in ll:
-        dic = species.name_backbone(name=classes, verbose=True)
+        dic = species.name_backbone(name=classes, verbose=True, timeout=300)
         cla = pd.DataFrame(API_request_name_usage(dic["usageKey"], 1000, 0)["results"])
         list_of_orders += list(cla[["order", "class"]].dropna().loc[:, "order"])
     return list_of_orders
 
 
 LIST_OF_ORDERS = from_classes_to_orders(LIST_OF_CLASSES)
-#print(
-#    "\n\nWARNING: I am shuffling the list of orders to explore different "
-#    + "datasets during the development stage. Remove for production phase.\n\n"
-#)
-##random.shuffle(LIST_OF_ORDERS)
-LIST_OF_ORDERS=LIST_OF_ORDERS[LIST_OF_ORDERS.index('Zingiberales'):]
+#LIST_OF_ORDERS = LIST_OF_ORDERS[LIST_OF_ORDERS.index("Zingiberales") :]
 print(LIST_OF_ORDERS)
 # LIST_OF_CLASSES = ["Rotaliida", "Ericales", "Asterales"]
 
@@ -175,8 +171,6 @@ for order in LIST_OF_ORDERS:
             print(list(df_order["family"]))
             for i, vali in df_order.iterrows():
                 keep_going_fam, offset_fam = True, 0
-                # if vali["family"] in ["Asteraceae", "Calyceraceae", "Campanulaceae"]:
-                #    keep_going_fam = False
                 while keep_going_fam:
                     print(
                         f'\n\n\nOffset loop on families "{vali["family"]}" with offset {offset_fam}'
