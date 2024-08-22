@@ -124,10 +124,10 @@ distrib_qdgc_groupbys["fossil_specimen"] = 0
 print(distrib_qdgc_groupbys)
 
 
-distrib_qdgc_groupbys = distrib_qdgc_groupbys.drop(
-    ["year", "basisOfRecord"], axis=1
+distrib_qdgc_groupbys = distrib_qdgc_groupbys.drop(["year", "basisOfRecord"], axis=1)
+distrib_qdgc_groupbys.to_csv(
+    DATABASE_FOLDER + "distrib_qdgc.csv", mode="w", header=True, index=False
 )
-distrib_qdgc_groupbys.to_csv(DATABASE_FOLDER + "distrib_qdgc.csv", mode="w", header=True, index=False)
 
 print("\nCompressing distrib.csv")
 os.system(f"zip {DATABASE_FOLDER}distrib.zip {DATABASE_FOLDER}distrib.csv")
@@ -135,17 +135,16 @@ os.system(f"rm {DATABASE_FOLDER}distrib.csv")
 
 
 # ADAPTING DISTRIB TABLE WITH OBSERVATION COUNTS =============================>
-occ_counts = distrib_qdgc_groupbys.groupby('taxonID')[['n_occ', 'locid']].agg({'n_occ':'sum', 'locid': 'count'})
+occ_counts = distrib_qdgc_groupbys.groupby("taxonID")[["n_occ", "locid"]].agg(
+    {"n_occ": "sum", "locid": "count"}
+)
 taxalist = pd.read_csv(DATABASE_FOLDER + "taxalist.csv")
-colnames=list(taxalist.columns)
-taxalist = taxalist.merge(occ_counts, on='taxonID', how='inner')
-taxalist.columns = colnames + ['nb_occ', 'nb_occ_qdgc']
+colnames = list(taxalist.columns)
+taxalist = taxalist.merge(occ_counts, on="taxonID", how="inner")
+taxalist.columns = colnames + ["nb_occ", "nb_occ_qdgc"]
 print(taxalist)
 taxalist.to_csv(DATABASE_FOLDER + "taxalist.csv", mode="w", header=True, index=False)
 # <============================================================================
-
-
-
 
 
 ##-;
