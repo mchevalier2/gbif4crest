@@ -135,15 +135,14 @@ def from_classes_to_orders(ll: list) -> list:
 
 
 LIST_OF_ORDERS = from_classes_to_orders(LIST_OF_CLASSES)
-print(
-    "\n\nWARNING: I am shuffling the list of orders to explore different "
-    + "datasets during the development stage. Remove for production phase.\n\n"
-)
-random.shuffle(LIST_OF_ORDERS)
+#print(
+#    "\n\nWARNING: I am shuffling the list of orders to explore different "
+#    + "datasets during the development stage. Remove for production phase.\n\n"
+#)
+##random.shuffle(LIST_OF_ORDERS)
+LIST_OF_ORDERS=LIST_OF_ORDERS[LIST_OF_ORDERS.index('Zingiberales'):]
 print(LIST_OF_ORDERS)
-
 # LIST_OF_CLASSES = ["Rotaliida", "Ericales", "Asterales"]
-
 
 count_occurrences = 0
 list_of_sp = []
@@ -180,7 +179,7 @@ for order in LIST_OF_ORDERS:
                 #    keep_going_fam = False
                 while keep_going_fam:
                     print(
-                        f'\n\n\nOffset loop on families "{vali['family']}" with offset {offset_fam}'
+                        f'\n\n\nOffset loop on families "{vali["family"]}" with offset {offset_fam}'
                     )
                     fam = API_request_name_usage(vali["key"], OFFSET_STEP, offset_fam)
                     keep_going_fam = not fam["endOfRecords"]
@@ -195,7 +194,7 @@ for order in LIST_OF_ORDERS:
                                 )
                                 keep_going_gen = not gen["endOfRecords"]
                                 print(
-                                    f'Genus: "{valj['genus']}" | Offset: {offset_gen} | Keepgoing: {keep_going_gen} | NSP: {len(gen["results"])} | Occ bef. process: {count_occurrences}'
+                                    f'Genus: "{valj["genus"]}" | Offset: {offset_gen} | Keepgoing: {keep_going_gen} | NSP: {len(gen["results"])} | Occ bef. process: {count_occurrences}'
                                 )
                                 offset_gen += OFFSET_STEP
                                 if len(gen["results"]) > 0:
@@ -228,9 +227,10 @@ for order in LIST_OF_ORDERS:
                                             list_of_sp += list(df_gen["speciesKey"])
     if count_occurrences > 40000000:
         print("\n\n\nCreating download request with:")
+        splist = '", "'.join([str(int(x)) for x in list_of_sp])
         res = occ.download(
             [
-                f'speciesKey in ["{'", "'.join([str(int(x)) for x in list_of_sp])}"]',
+                f'speciesKey in ["{splist}"]',
                 "decimalLatitude !Null",
                 "decimalLongitude !Null",
                 'basisOfRecord in ["LIVING_SPECIMEN", "OBSERVATION", '
