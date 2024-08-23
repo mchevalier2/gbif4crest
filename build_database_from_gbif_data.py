@@ -94,7 +94,7 @@ for datafile in LIST_OF_DATA_FILES:
             time.sleep(600)
     gbif_data = pd.DataFrame({'speciesKey':[-1], "decimalLongitude":[-1.0], "decimalLatitude":[-1.0], "year":[-1], "basisOfRecord":['']})
     ## Reading the occurrence data by chunks to not overload laptop.
-    for idx, temp_df in enumerate(pd.read_csv(DATA_FOLDER + datafile + ".zip", sep="\t", chunksize=2000000, low_memory=False)):
+    for idx, temp_df in enumerate(pd.read_csv(DATA_FOLDER + datafile + ".zip", sep="\t", chunksize=2000000, low_memory=False, on_bad_lines='warn')):
         print('chunk:', idx)
         temp_df = temp_df[
             ["speciesKey", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
