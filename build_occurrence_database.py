@@ -124,6 +124,26 @@ def API_request_count(taxonID: int):
         return -1
     return nb_occ
 
+def API_request_download(splist_str: str) -> None:
+    res = occ.download(
+        [
+            f'speciesKey in ["{splist_str}"]',
+            "decimalLatitude !Null",
+            "decimalLongitude !Null",
+            'basisOfRecord in ["LIVING_SPECIMEN", "OBSERVATION", '
+            + '"HUMAN_OBSERVATION", "MACHINE_OBSERVATION", "MATERIAL_SAMPLE", '
+            + '"MATERIAL_CITATION", "OCCURRENCE"]',
+        ],
+        "SIMPLE_CSV",
+        user=GBIF_USERNAME,
+        pwd=GBIF_PASSWORD,
+        email=GBIF_EMAIL,
+    )
+    with open(DATA_FOLDER + "requests_list.txt", "a", encoding="utf-8") as f:
+        f.write(str(res) + "\n")
+    with open(DATA_FOLDER + "download_list.txt", "a", encoding="utf-8") as f:
+        f.write(str(res[0]) + "\n")
+
 
 def from_classes_to_orders(ll: list) -> list:
     """Queries the GBIF API to return the list of orders corresponding to a class"""
@@ -136,7 +156,7 @@ def from_classes_to_orders(ll: list) -> list:
 
 
 LIST_OF_ORDERS = from_classes_to_orders(LIST_OF_CLASSES)
-#LIST_OF_ORDERS = LIST_OF_ORDERS[LIST_OF_ORDERS.index("Zingiberales") :]
+LIST_OF_ORDERS = LIST_OF_ORDERS[LIST_OF_ORDERS.index("Macroscelidea"):]
 print(LIST_OF_ORDERS)
 # LIST_OF_CLASSES = ["Rotaliida", "Ericales", "Asterales"]
 
@@ -166,7 +186,7 @@ for order in LIST_OF_ORDERS:
         keep_going_order = not ord["endOfRecords"]
         offset_order += OFFSET_STEP
         df_order = pd.DataFrame(ord["results"])
-        if df_order.shape[0] > 0:
+        if (df_order.shape[0] > 0) and ('family' in df_order.columns):
             df_order = df_order[df_order["family"].notna()]
             print(list(df_order["family"]))
             for i, vali in df_order.iterrows():
@@ -222,27 +242,13 @@ for order in LIST_OF_ORDERS:
     if count_occurrences > 40000000:
         print("\n\n\nCreating download request with:")
         splist = '", "'.join([str(int(x)) for x in list_of_sp])
-        res = occ.download(
-            [
-                f'speciesKey in ["{splist}"]',
-                "decimalLatitude !Null",
-                "decimalLongitude !Null",
-                'basisOfRecord in ["LIVING_SPECIMEN", "OBSERVATION", '
-                + '"HUMAN_OBSERVATION", "MACHINE_OBSERVATION", "MATERIAL_SAMPLE", '
-                + '"MATERIAL_CITATION", "OCCURRENCE"]',
-            ],
-            "SIMPLE_CSV",
-            user=GBIF_USERNAME,
-            pwd=GBIF_PASSWORD,
-            email=GBIF_EMAIL,
-        )
-        with open(DATA_FOLDER + "requests_list.txt", "a", encoding="utf-8") as f:
-            f.write(str(res) + "\n")
-        with open(DATA_FOLDER + "download_list.txt", "a", encoding="utf-8") as f:
-            f.write(str(res[0]) + "\n")
+        API_request_download(splist)
         count_occurrences = 0
         list_of_sp = []
 
+
+splist = '", "'.join([str(int(x)) for x in list_of_sp])
+API_request_download(splist)
 
 ## Some quick cleaning of the created files
 ## If no taxa names were added to a order files, the file is removed.
@@ -250,8 +256,9 @@ for f in [x for x in os.listdir(DATA_FOLDER) if x.startswith("taxalist_")]:
     wc = int(
         subprocess.check_output(["wc", "-l", DATA_FOLDER + f]).decode("utf8").split()[0]
     )
+    print(f, wc)
     if wc == 1:
-        pathlib.Path.unlink(DATA_FOLDER + f)
+        os.remove(DATA_FOLDER + f)
 
 
 ##-;
