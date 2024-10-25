@@ -16,7 +16,14 @@ A data engineering pipeline to process observations from the [GBIF database](htt
     [x] Create distrib_qdgc from distrib
     [x] Add nb_occ and nb_occ_qdgc to taxalist
     [x] Delete distrib (compress for now)
-    [ ] Create biogeography and geopolitical_units tables
+    [x] Clean taxa from taxalist that are not in distrib_qdgc
+    [x] Download all necessary geophysical datasets
+    [x] Rasterize_shp
+    [x] Create biogeography and geopolitical_units tables
     [ ] Create data_qdgc tables
-    [ ] Clean taxa from taxalist that are not in distrib_qdgc
+        [x] Terrestrial variables
+        [x] Marine variables
+        [ ] Biogeography variables
+        [x] Fix cells with missing values
+    [ ] Create SQLite3 database with all fastenning indexes (postprocess.sql)
     [ ] Clean unnecessary downloads from GBIF

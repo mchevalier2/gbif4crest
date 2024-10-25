@@ -28,10 +28,10 @@ distrib = pd.read_csv(DATABASE_FOLDER + "distrib.csv")
 
 distrib["longitude"] = distrib["decimalLongitude"].apply(nearest_quarter)
 distrib["latitude"] = distrib["decimalLatitude"].apply(nearest_quarter)
-distrib["locid"] = distrib[["longitude", "latitude"]].apply(f_locid, axis=1)
+distrib["locID"] = distrib[["longitude", "latitude"]].apply(f_locid, axis=1)
 
 distrib_qdgc = distrib[
-    ["taxonID", "longitude", "latitude", "locid", "year", "basisOfRecord"]
+    ["taxonID", "longitude", "latitude", "locID", "year", "basisOfRecord"]
 ].drop_duplicates()
 print(distrib_qdgc)
 
@@ -73,7 +73,7 @@ def get_basisOfRecord(x: [], bOR: str) -> int:
     return 1 if bOR in x else 0
 
 
-distrib_qdgc_groupbys = distrib_qdgc.groupby(["taxonID", "locid"])[
+distrib_qdgc_groupbys = distrib_qdgc.groupby(["taxonID", "locID"])[
     ["year", "basisOfRecord", "longitude"]
 ].agg(
     {"year": groupby_year, "basisOfRecord": groupby_basisofrecord, "longitude": "count"}
@@ -104,7 +104,7 @@ for b in LIST_OF_BORS:
 
 distrib_qdgc_groupbys.columns = [
     "taxonID",
-    "locid",
+    "locID",
     "year",
     "basisOfRecord",
     "n_occ",
@@ -134,9 +134,9 @@ os.system(f"zip {DATABASE_FOLDER}distrib.zip {DATABASE_FOLDER}distrib.csv")
 os.system(f"rm {DATABASE_FOLDER}distrib.csv")
 
 
-# ADAPTING DISTRIB TABLE WITH OBSERVATION COUNTS =============================>
-occ_counts = distrib_qdgc_groupbys.groupby("taxonID")[["n_occ", "locid"]].agg(
-    {"n_occ": "sum", "locid": "count"}
+# ADAPTING TAXALIST TABLE WITH OBSERVATION COUNTS =============================>
+occ_counts = distrib_qdgc_groupbys.groupby("taxonID")[["n_occ", "locID"]].agg(
+    {"n_occ": "sum", "locID": "count"}
 )
 taxalist = pd.read_csv(DATABASE_FOLDER + "taxalist.csv")
 colnames = list(taxalist.columns)

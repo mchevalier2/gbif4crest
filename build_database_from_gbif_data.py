@@ -23,6 +23,12 @@ except FileExistsError:
     pass
 
 
+try:
+    os.mkdir(DATABASE_FOLDER)
+except FileExistsError:
+    pass
+
+
 ## CREATING TAXALIST TABLE ====================================================>
 print("\n\n\nCREATING TAXALIST TABLE")
 
@@ -110,6 +116,8 @@ for datafile in LIST_OF_DATA_FILES:
     gbif_data = gbif_data[
         ["taxonID", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
     ]
+    if datafile == '0088888-240626123714530':
+        gbif_data = gbif_data.query("year != 'J. P. Ospina, A. Díaz Pulido, M. Vergara'")
     gbif_data["year"] = pd.to_numeric(gbif_data["year"]).astype("Int64")
     gbif_data["taxonID"] = gbif_data["taxonID"].astype("Int64")
     gbif_data = gbif_data[gbif_data["taxonID"].notna()]

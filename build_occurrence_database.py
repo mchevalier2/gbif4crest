@@ -24,7 +24,7 @@ LIST_OF_CLASSES = (
     ]
     + ["Anthocerotopsida"]  ## More plants
     + ["Mammalia"]  ## mammals including rodents
-    + ["Bacillariophyceae"]  ## diatoms
+    #+ ["Bacillariophyceae"]  ## diatoms
     + [  ## More plants
         "Bryopsida",
         "Sphagnopsida",
@@ -34,7 +34,7 @@ LIST_OF_CLASSES = (
         "Andreaeobryopsida",
     ]
     + ["Jungermanniopsida", "Marchantiopsida", "Haplomitriopsida"]  ## More plants
-    + ["Globothalamea", "Tubothalamea"]  ## forams
+    #+ ["Globothalamea", "Tubothalamea"]  ## forams
 )
 
 

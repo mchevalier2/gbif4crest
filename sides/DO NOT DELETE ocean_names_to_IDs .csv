@@ -1,0 +1,102 @@
+country,ID,ocean
+Indian Ocean,1904,Indian Ocean
+Arctic Ocean,1906,Arctic Ocean
+Southern Ocean,1907,Southern Ocean
+North Pacific Ocean,1908,Pacific Ocean
+South Pacific Ocean,1910,Pacific Ocean
+North Atlantic Ocean,1912,Atlantic Ocean
+South Atlantic Ocean,1914,Atlantic Ocean
+North Sea,2350,Atlantic Ocean
+Celtic Sea,2351,Atlantic Ocean
+Norwegian Sea,2353,Atlantic Ocean
+Greenland Sea,2356,Arctic Ocean
+Irish Sea and St. George's Channel,2357,Atlantic Ocean
+Bay of Biscay,2359,Atlantic Ocean
+Kattegat,2374,Atlantic Ocean
+Skagerrak,2379,Atlantic Ocean
+English Channel,2389,Atlantic Ocean
+Baltic Sea,2401,Atlantic Ocean
+Gulf of Bothnia,2402,Atlantic Ocean
+Gulf of Finland,2407,Atlantic Ocean
+Gulf of Riga,2409,Atlantic Ocean
+Bristol Channel,3141,Atlantic Ocean
+Adriatic Sea,3314,Atlantic Ocean
+Aegean Sea,3315,Atlantic Ocean
+Black Sea,3319,Atlantic Ocean
+Sea of Azov,3320,Atlantic Ocean
+Balearic (Iberian Sea),3322,Atlantic Ocean
+Alboran Sea,3324,Atlantic Ocean
+Strait of Gibraltar,3346,Atlantic Ocean
+Ionian Sea,3351,Atlantic Ocean
+Ligurian Sea,3363,Atlantic Ocean
+Sea of Marmara,3369,Atlantic Ocean
+Tyrrhenian Sea,3386,Atlantic Ocean
+East Siberian Sea,4244,Arctic Ocean
+Laptev Sea,4245,Arctic Ocean
+Kara Sea,4246,Arctic Ocean
+Barentsz Sea,4247,Arctic Ocean
+White Sea,4248,Arctic Ocean
+Davis Strait,4250,Atlantic Ocean
+Hudson Strait,4251,Atlantic Ocean
+Hudson Bay,4252,Arctic Ocean
+Baffin Bay,4253,Arctic Ocean
+Lincoln Sea,4254,Arctic Ocean
+Beaufort Sea,4256,Arctic Ocean
+Chukchi Sea,4257,Arctic Ocean
+Mozambique Channel,4261,Indian Ocean
+Gulf of Suez,4262,Indian Ocean
+Gulf of Aqaba,4263,Indian Ocean
+Red Sea,4264,Indian Ocean
+Gulf of Aden,4265,Indian Ocean
+Persian Gulf,4266,Indian Ocean
+Gulf of Oman,4267,Indian Ocean
+Arabian Sea,4268,Indian Ocean
+Laccadive Sea,4269,Indian Ocean
+Bay of Bengal,4273,Indian Ocean
+Andaman or Burma Sea,4274,Indian Ocean
+Malacca Strait,4275,Indian Ocean
+Great Australian Bight,4276,Indian Ocean
+Mediterranean Sea - Western Basin,4279,Atlantic Ocean
+Mediterranean Sea - Eastern Basin,4280,Atlantic Ocean
+Inner Seas off the West Coast of Scotland,4283,Atlantic Ocean
+Gulf of Guinea,4286,Atlantic Ocean
+Caribbean Sea,4287,Atlantic Ocean
+Gulf of Mexico,4288,Atlantic Ocean
+Bay of Fundy,4289,Atlantic Ocean
+Gulf of St. Lawrence,4290,Atlantic Ocean
+Labrador Sea,4291,Atlantic Ocean
+Philippine Sea,4300,Pacific Ocean
+Eastern China Sea,4302,Pacific Ocean
+Yellow Sea,4303,Pacific Ocean
+Seto Naikai or Inland Sea,4306,Pacific Ocean
+Japan Sea,4307,Pacific Ocean
+Sea of Okhotsk,4309,Pacific Ocean
+Bering Sea,4310,Pacific Ocean
+Gulf of Alaska,4312,Pacific Ocean
+The Coastal Waters of Southeast Alaska and British Columbia,4313,Pacific Ocean
+Gulf of California,4314,Pacific Ocean
+Rio de La Plata,4325,Atlantic Ocean
+South China Sea,4332,Pacific Ocean
+Gulf of Thailand,4334,Pacific Ocean
+Singapore Strait,4336,Pacific Ocean
+Java Sea,4338,Pacific Ocean
+Makassar Strait,4339,Pacific Ocean
+Bali Sea,4340,Pacific Ocean
+Flores Sea,4341,Pacific Ocean
+Savu Sea,4343,Indian Ocean
+Timor Sea,4344,Indian Ocean
+Arafura Sea,4347,Pacific Ocean
+Banda Sea,4349,Pacific Ocean
+Gulf of Boni,4350,Pacific Ocean
+Ceram Sea,4351,Pacific Ocean
+Halmahera Sea,4353,Pacific Ocean
+Molukka Sea,4354,Pacific Ocean
+Gulf of Tomini,4355,Pacific Ocean
+Sulu Sea,4358,Pacific Ocean
+Celebes Sea,4359,Pacific Ocean
+Bismarck Sea,4360,Pacific Ocean
+Solomon Sea,4361,Pacific Ocean
+Coral Sea,4364,Pacific Ocean
+Tasman Sea,4365,Pacific Ocean
+Bass Strait,4366,Pacific Ocean
+The Northwestern Passages,5698,Arctic Ocean
