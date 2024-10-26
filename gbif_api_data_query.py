@@ -1,8 +1,6 @@
 """ This script extract taxonomic and distribution data for taxa from GBIF. """
 
 import os
-import pathlib
-import random
 import subprocess
 import time
 
@@ -24,7 +22,7 @@ LIST_OF_CLASSES = (
     ]
     + ["Anthocerotopsida"]  ## More plants
     + ["Mammalia"]  ## mammals including rodents
-    #+ ["Bacillariophyceae"]  ## diatoms
+    # + ["Bacillariophyceae"]  ## diatoms
     + [  ## More plants
         "Bryopsida",
         "Sphagnopsida",
@@ -34,7 +32,7 @@ LIST_OF_CLASSES = (
         "Andreaeobryopsida",
     ]
     + ["Jungermanniopsida", "Marchantiopsida", "Haplomitriopsida"]  ## More plants
-    #+ ["Globothalamea", "Tubothalamea"]  ## forams
+    # + ["Globothalamea", "Tubothalamea"]  ## forams
 )
 
 
@@ -54,8 +52,8 @@ TREE_OF_LIFE = [
     "species",
 ]
 
-with open("gbif_pwd.txt", encoding="utf-8") as f:
-    GBIF_USERNAME, GBIF_PASSWORD, GBIF_EMAIL = [x[:-1] for x in f.readlines()]
+with open("gbif_pwd.txt", encoding="utf-8") as file:
+    GBIF_USERNAME, GBIF_PASSWORD, GBIF_EMAIL = [x[:-1] for x in file.readlines()]
 
 
 try:
@@ -70,7 +68,7 @@ except FileExistsError:
     pass
 
 
-def API_request_name_usage(key: int, limit: int, offset: int) -> {}:
+def api_request_name_usage(key: int, limit: int, offset: int) -> {}:
     """Queries the GBIF API to get the list of children of a taxon"""
     keepgoing = True
     idx = 0
@@ -82,7 +80,7 @@ def API_request_name_usage(key: int, limit: int, offset: int) -> {}:
                 rank="SPECIES",
                 limit=limit,
                 offset=offset,
-                timeout=300
+                timeout=300,
             )
             keepgoing = False
         except (
@@ -101,13 +99,15 @@ def API_request_name_usage(key: int, limit: int, offset: int) -> {}:
     return request
 
 
-def API_request_count(taxonID: int):
+def api_request_count(taxon_id: int):
     """Queries the GBIF API to get the number of occurrences of a taxon"""
     keepgoing = True
     idx = 0
     while keepgoing and idx < 10:
         try:
-            nb_occ = occ.count(taxonKey=int(taxonID), isGeoreferenced=True, timeout=300)
+            nb_occ = occ.count(
+                taxonKey=int(taxon_id), isGeoreferenced=True, timeout=300
+            )
             keepgoing = False
         except (
             requests.exceptions.ReadTimeout,
@@ -124,7 +124,9 @@ def API_request_count(taxonID: int):
         return -1
     return nb_occ
 
-def API_request_download(splist_str: str) -> None:
+
+def api_request_download(splist_str: str) -> None:
+    """Triggers the download from GBIF and saves the requests to local files"""
     res = occ.download(
         [
             f'speciesKey in ["{splist_str}"]',
@@ -150,13 +152,13 @@ def from_classes_to_orders(ll: list) -> list:
     list_of_orders = []
     for classes in ll:
         dic = species.name_backbone(name=classes, verbose=True, timeout=300)
-        cla = pd.DataFrame(API_request_name_usage(dic["usageKey"], 1000, 0)["results"])
+        cla = pd.DataFrame(api_request_name_usage(dic["usageKey"], 1000, 0)["results"])
         list_of_orders += list(cla[["order", "class"]].dropna().loc[:, "order"])
     return list_of_orders
 
 
 LIST_OF_ORDERS = from_classes_to_orders(LIST_OF_CLASSES)
-LIST_OF_ORDERS = LIST_OF_ORDERS[LIST_OF_ORDERS.index("Macroscelidea"):]
+LIST_OF_ORDERS = LIST_OF_ORDERS[LIST_OF_ORDERS.index("Macroscelidea") :]
 print(LIST_OF_ORDERS)
 # LIST_OF_CLASSES = ["Rotaliida", "Ericales", "Asterales"]
 
@@ -181,12 +183,12 @@ for order in LIST_OF_ORDERS:
             "taxonID,kingdom,phylum,class_name,order_name,family,genus,species\n"
         )
     while keep_going_order:
-        ord = API_request_name_usage(usageKey, OFFSET_STEP, offset_order)
+        order_name = api_request_name_usage(usageKey, OFFSET_STEP, offset_order)
         print(f"\n\n\nOffset loop on orders: {offset_order} with order {order}")
-        keep_going_order = not ord["endOfRecords"]
+        keep_going_order = not order_name["endOfRecords"]
         offset_order += OFFSET_STEP
-        df_order = pd.DataFrame(ord["results"])
-        if (df_order.shape[0] > 0) and ('family' in df_order.columns):
+        df_order = pd.DataFrame(order_name["results"])
+        if (df_order.shape[0] > 0) and ("family" in df_order.columns):
             df_order = df_order[df_order["family"].notna()]
             print(list(df_order["family"]))
             for i, vali in df_order.iterrows():
@@ -195,7 +197,7 @@ for order in LIST_OF_ORDERS:
                     print(
                         f'\n\n\nOffset loop on families "{vali["family"]}" with offset {offset_fam}'
                     )
-                    fam = API_request_name_usage(vali["key"], OFFSET_STEP, offset_fam)
+                    fam = api_request_name_usage(vali["key"], OFFSET_STEP, offset_fam)
                     keep_going_fam = not fam["endOfRecords"]
                     offset_fam += OFFSET_STEP
                     df_fam = pd.DataFrame(fam["results"])
@@ -203,7 +205,7 @@ for order in LIST_OF_ORDERS:
                         for j, valj in df_fam.iterrows():
                             keep_going_gen, offset_gen = True, 0
                             while keep_going_gen:
-                                gen = API_request_name_usage(
+                                gen = api_request_name_usage(
                                     valj["key"], OFFSET_STEP, offset_gen
                                 )
                                 keep_going_gen = not gen["endOfRecords"]
@@ -223,7 +225,7 @@ for order in LIST_OF_ORDERS:
                                     )
                                     if "speciesKey" in df_gen.columns:
                                         for k, valk in df_gen.iterrows():
-                                            nbocc = API_request_count(
+                                            nbocc = api_request_count(
                                                 int(valk["speciesKey"])
                                             )
                                             if nbocc < SP_OCC_THRESHOLD:
@@ -242,23 +244,35 @@ for order in LIST_OF_ORDERS:
     if count_occurrences > 40000000:
         print("\n\n\nCreating download request with:")
         splist = '", "'.join([str(int(x)) for x in list_of_sp])
-        API_request_download(splist)
+        api_request_download(splist)
         count_occurrences = 0
         list_of_sp = []
 
 
 splist = '", "'.join([str(int(x)) for x in list_of_sp])
-API_request_download(splist)
+api_request_download(splist)
 
 ## Some quick cleaning of the created files
 ## If no taxa names were added to a order files, the file is removed.
-for f in [x for x in os.listdir(DATA_FOLDER) if x.startswith("taxalist_")]:
+for file in [x for x in os.listdir(DATA_FOLDER) if x.startswith("taxalist_")]:
     wc = int(
-        subprocess.check_output(["wc", "-l", DATA_FOLDER + f]).decode("utf8").split()[0]
+        subprocess.check_output(["wc", "-l", DATA_FOLDER + file])
+        .decode("utf8")
+        .split()[0]
     )
-    print(f, wc)
+    print(file, wc)
     if wc == 1:
-        os.remove(DATA_FOLDER + f)
+        os.remove(DATA_FOLDER + file)
 
 
 ##-;
+
+""" Accepted pylint errors *************
+    213:0: C0301: Line too long (185/100) (line-too-long)
+    154:8: W0621: Redefining name 'dic' from outer scope (line 168) (redefined-outer-name)
+    165:0: C0103: Constant name "count_occurrences" doesn't conform to UPPER_CASE naming style (invalid-name)
+    178:12: C0103: Constant name "keep_going_order" doesn't conform to UPPER_CASE naming style (invalid-name)
+    186:44: E0606: Possibly using variable 'usageKey' before assignment (possibly-used-before-assignment)
+    246:8: C0103: Constant name "splist" doesn't conform to UPPER_CASE naming style (invalid-name)
+    270:0: W0105: String statement has no effect (pointless-string-statement)
+"""

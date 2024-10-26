@@ -1,4 +1,4 @@
-""" This script downloads and processes the results of the API requests """
+""" This script downloads and processes the results of the GBIF API requests """
 
 import os
 import time
@@ -33,7 +33,7 @@ except FileExistsError:
 print("\n\n\nCREATING TAXALIST TABLE")
 
 
-def create_ID_from_taxonomy(x: []) -> int:
+def create_id_from_taxonomy(x: []) -> int:
     """Creates a database-specific ID based on the taxonomy and existing ID"""
     a, b, d = x
     ## Plants
@@ -56,7 +56,10 @@ LIST_OF_TAXALIST_FILES = [
 ]
 taxalist = (
     pd.concat(
-        (pd.read_csv(DATA_FOLDER + f, low_memory=False) for f in LIST_OF_TAXALIST_FILES),
+        (
+            pd.read_csv(DATA_FOLDER + f, low_memory=False)
+            for f in LIST_OF_TAXALIST_FILES
+        ),
         ignore_index=True,
     )
     .drop_duplicates()
@@ -67,7 +70,7 @@ taxalist = (
 taxalist["gbifID"] = taxalist["taxonID"]
 taxalist["newID"] = taxalist.groupby(["kingdom"]).agg({"taxonID": "cumcount"})
 taxalist["taxonID"] = taxalist[["phylum", "class_name", "newID"]].apply(
-    create_ID_from_taxonomy, axis=1
+    create_id_from_taxonomy, axis=1
 )
 taxalist = taxalist.sort_values("taxonID")
 taxalist["gbifID"] = taxalist["gbifID"].astype("Int64")
@@ -98,26 +101,51 @@ for datafile in LIST_OF_DATA_FILES:
             keeptrying = False
         except:
             time.sleep(600)
-    gbif_data = pd.DataFrame({'speciesKey':[-1], "decimalLongitude":[-1.0], "decimalLatitude":[-1.0], "year":[-1], "basisOfRecord":['']})
+    gbif_data = pd.DataFrame(
+        {
+            "speciesKey": [-1],
+            "decimalLongitude": [-1.0],
+            "decimalLatitude": [-1.0],
+            "year": [-1],
+            "basisOfRecord": [""],
+        }
+    )
     ## Reading the occurrence data by chunks to not overload laptop.
-    for idx, temp_df in enumerate(pd.read_csv(DATA_FOLDER + datafile + ".zip", sep="\t", chunksize=2000000, low_memory=False, on_bad_lines='warn')):
-        print('chunk:', idx)
+    for idx, temp_df in enumerate(
+        pd.read_csv(
+            DATA_FOLDER + datafile + ".zip",
+            sep="\t",
+            chunksize=2000000,
+            low_memory=False,
+            on_bad_lines="warn",
+        )
+    ):
+        print("chunk:", idx)
         temp_df = temp_df[
-            ["speciesKey", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
+            [
+                "speciesKey",
+                "decimalLongitude",
+                "decimalLatitude",
+                "year",
+                "basisOfRecord",
+            ]
         ].drop_duplicates()
         temp_df = temp_df[temp_df["decimalLongitude"].notna()]
         gbif_data = pd.concat([gbif_data, temp_df], ignore_index=True)
     gbif_data = (
-        gbif_data
-        .drop(index=0) # Excluding the fake row I added to circumvent the warning
+        gbif_data.drop(
+            index=0
+        )  # Excluding the fake row I added to circumvent the warning
         .drop_duplicates()
         .merge(taxalist, left_on="speciesKey", right_on="gbifID", how="left")
     )
     gbif_data = gbif_data[
         ["taxonID", "decimalLongitude", "decimalLatitude", "year", "basisOfRecord"]
     ]
-    if datafile == '0088888-240626123714530':
-        gbif_data = gbif_data.query("year != 'J. P. Ospina, A. Díaz Pulido, M. Vergara'")
+    if datafile == "0088888-240626123714530":
+        gbif_data = gbif_data.query(
+            "year != 'J. P. Ospina, A. Díaz Pulido, M. Vergara'"
+        )
     gbif_data["year"] = pd.to_numeric(gbif_data["year"]).astype("Int64")
     gbif_data["taxonID"] = gbif_data["taxonID"].astype("Int64")
     gbif_data = gbif_data[gbif_data["taxonID"].notna()]
@@ -161,3 +189,10 @@ os.system(f"rm {TEMP_FOLDER}distrib_*.useless")
 
 
 ##-;
+
+""" Accepted pylint errors *************
+    196:0: C0301: Line too long (105/100) (line-too-long)
+    102:8: W0702: No exception type(s) specified (bare-except)
+    101:12: C0103: Constant name "keeptrying" doesn't conform to UPPER_CASE naming style (invalid-name)
+    93:0: W0105: String statement has no effect (pointless-string-statement)
+"""

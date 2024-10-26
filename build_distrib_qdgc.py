@@ -66,11 +66,12 @@ def get_yr(x: float, lvl: int) -> float:
         return x[1]
     if lvl == 2:
         return 0 if x[2] == "NULL" else 1
+    return None
 
 
-def get_basisOfRecord(x: [], bOR: str) -> int:
-    """Returns 1 if bOR in x"""
-    return 1 if bOR in x else 0
+def get_basis_of_record(x: [], basis_of_rec: str) -> int:
+    """Returns 1 if basis_of_rec in x"""
+    return 1 if basis_of_rec in x else 0
 
 
 distrib_qdgc_groupbys = distrib_qdgc.groupby(["taxonID", "locID"])[
@@ -99,7 +100,7 @@ LIST_OF_BORS = [
 ]
 for b in LIST_OF_BORS:
     distrib_qdgc_groupbys[b.lower()] = distrib_qdgc_groupbys["basisOfRecord"].apply(
-        get_basisOfRecord, bOR=b
+        get_basis_of_record, basis_of_rec=b
     )
 
 distrib_qdgc_groupbys.columns = [
@@ -148,3 +149,7 @@ taxalist.to_csv(DATABASE_FOLDER + "taxalist.csv", mode="w", header=True, index=F
 
 
 ##-;
+
+""" Accepted pylint errors *************
+    153:0: W0105: String statement has no effect (pointless-string-statement)
+"""
