@@ -55,7 +55,7 @@ Alternatively, you can download the followin packages (and their dependencies) m
 Once ready, you can start pulling data with the following command. If you are running this script with the default LIST_OF_CLASSES, it may take several days to compute.
 
 ```
-python gbif_api_data_query.py
+python gbif_api_data_query.py 
 ```
 
 
