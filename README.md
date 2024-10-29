@@ -121,7 +121,7 @@ This step is not automatised because some websites block such automatic download
 ### Step 5: Build the biogeography and geopolitical tables
 
 
-**What it does**: Tasterizes (i.e. grids) all the datasets downloaded as shapefile (vector format) at the predefined spatial resolution of 1/12°.
+**What it does**: Rasterizes (i.e. grids) all the datasets downloaded as shapefile (vector format) at the predefined spatial resolution of 1/12°.
 
 
 **Possible interactions**: No interaction expected at this stage.
