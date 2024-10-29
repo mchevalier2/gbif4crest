@@ -158,9 +158,7 @@ def from_classes_to_orders(ll: list) -> list:
 
 
 LIST_OF_ORDERS = from_classes_to_orders(LIST_OF_CLASSES)
-LIST_OF_ORDERS = LIST_OF_ORDERS[LIST_OF_ORDERS.index("Macroscelidea") :]
 print(LIST_OF_ORDERS)
-# LIST_OF_CLASSES = ["Rotaliida", "Ericales", "Asterales"]
 
 count_occurrences = 0
 list_of_sp = []
@@ -268,11 +266,11 @@ for file in [x for x in os.listdir(DATA_FOLDER) if x.startswith("taxalist_")]:
 ##-;
 
 """ Accepted pylint errors *************
-    213:0: C0301: Line too long (185/100) (line-too-long)
+    211:0: C0301: Line too long (185/100) (line-too-long)
     154:8: W0621: Redefining name 'dic' from outer scope (line 168) (redefined-outer-name)
-    165:0: C0103: Constant name "count_occurrences" doesn't conform to UPPER_CASE naming style (invalid-name)
-    178:12: C0103: Constant name "keep_going_order" doesn't conform to UPPER_CASE naming style (invalid-name)
-    186:44: E0606: Possibly using variable 'usageKey' before assignment (possibly-used-before-assignment)
-    246:8: C0103: Constant name "splist" doesn't conform to UPPER_CASE naming style (invalid-name)
-    270:0: W0105: String statement has no effect (pointless-string-statement)
+    163:0: C0103: Constant name "count_occurrences" doesn't conform to UPPER_CASE naming style (invalid-name)
+    176:12: C0103: Constant name "keep_going_order" doesn't conform to UPPER_CASE naming style (invalid-name)
+    184:44: E0606: Possibly using variable 'usageKey' before assignment (possibly-used-before-assignment)
+    244:8: C0103: Constant name "splist" doesn't conform to UPPER_CASE naming style (invalid-name)
+    268:0: W0105: String statement has no effect (pointless-string-statement)
 """
